@@ -238,19 +238,22 @@ public:
     }
 
     // Process each frame and extract MFCC
-    v_d processFrame(int16_t* samples, size_t N) {
+    v_d processFrame(int16_t* samples, size_t N,bool cal) {
         // Add samples from the previous frame that overlap with the current frame
         // to the current samples and create the frame.
 
         frame = prevsamples;
         for (int i=0; i<N; i++)
             frame.push_back(samples[i*2]);
-    
+        
         prevsamples.assign(frame.begin()+frameShiftSamples, frame.end());
-        preEmphHam();
+        if(cal){
+            preEmphHam();
         computePowerSpec();
         applyLMFB();
         applyDct();
+        }
+       
         return mfcc;
     }
 

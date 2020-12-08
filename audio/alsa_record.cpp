@@ -40,34 +40,38 @@ AlsaRecord::~AlsaRecord()
 
 void AlsaRecord::init()
 {   
-    init_soundcard();
-    std::cout << "Open and init done" << "\n";
+    
 
      int numCepstra = 12;
     int numFilters = 40;
-    int samplingRate =10000;
+    int samplingRate =16000;
     int winLength = 25;
-    int frameShift = 10;
+    int frameShift =10;
     int lowFreq = 50;
     int highFreq =samplingRate/2;
 
+
+    srate=samplingRate;
+    init_soundcard();
+    std::cout << "Open and init done" << "\n";
     // Initialise MFCC class instance
     this->mfcc= new MFCC(samplingRate, numCepstra, winLength, frameShift, numFilters, lowFreq, highFreq);
-    double* compare_daa=new double[80*(numCepstra+1)];
-    std::ifstream in("input.txt");  
+    int dtw_length=120;
+    double* compare_daa=new double[dtw_length*(numCepstra+1)];
+    std::ifstream in("test.txt");  
     std::string s;
     int i=0;
     while (getline(in, s)) {//读取每一行
         compare_daa[i]=atof(s.c_str());
         std::cout<<compare_daa[i]<<std::endl;
         i++;
-        if(i>=80*13){
+        if(i>=dtw_length*13){
             break;
         }
          
     }
 
-    this->ad= new AudioData(80,numCepstra+1,compare_daa,80);
+    this->ad= new AudioData(dtw_length,numCepstra+1,compare_daa,dtw_length);
 
 
 }
@@ -77,7 +81,7 @@ void AlsaRecord::init()
 int AlsaRecord::init_soundcard()
 {
     int err = 0;
-
+    
     if ((err = snd_pcm_open(&capture_handle, snd_device, SND_PCM_STREAM_CAPTURE, 0)) < 0)
 
     {
@@ -155,7 +159,41 @@ int AlsaRecord::do_record()
 {
     this->b_quit=true;
     int err = 0;
+    fwav = fopen("test.wav", "wb");
+    wav_h.ChunkID[0]     = 'R';
+    wav_h.ChunkID[1]     = 'I';
+    wav_h.ChunkID[2]     = 'F';
+    wav_h.ChunkID[3]     = 'F';
 
+    wav_h.Format[0]      = 'W';
+    wav_h.Format[1]      = 'A';
+    wav_h.Format[2]      = 'V';
+    wav_h.Format[3]      = 'E';
+
+    wav_h.Subchunk1ID[0] = 'f';
+    wav_h.Subchunk1ID[1] = 'm';
+    wav_h.Subchunk1ID[2] = 't';
+    wav_h.Subchunk1ID[3] = ' ';
+
+    wav_h.Subchunk2ID[0] = 'd';
+    wav_h.Subchunk2ID[1] = 'a';
+    wav_h.Subchunk2ID[2] = 't';
+    wav_h.Subchunk2ID[3] = 'a';
+
+    wav_h.NumChannels = 2;
+    wav_h.BitsPerSample = 16;
+    wav_h.Subchunk2Size = 300 * MAX_SAMPLES * (uint32_t) wav_h.NumChannels * (uint32_t) wav_h.BitsPerSample / 8;
+    //wav_h.Subchunk2Size = 0xFFFFFFFF;
+    wav_h.ChunkSize = (uint32_t) wav_h.Subchunk2Size + 36;
+    wav_h.Subchunk1Size = 16;
+    wav_h.AudioFormat = 1;
+    wav_h.SampleRate = srate;
+    wav_h.ByteRate = (uint32_t) wav_h.SampleRate
+                     * (uint32_t) wav_h.NumChannels
+                     * (uint32_t) wav_h.BitsPerSample / 8;
+    wav_h.BlockAlign = (uint32_t) wav_h.NumChannels * (uint32_t) wav_h.BitsPerSample / 8;
+
+    fwrite(&wav_h, 1, sizeof(wav_h), fwav);
     int16_t wav_data[(mfcc->winLengthSamples-mfcc->frameShiftSamples) *2];
      std::cout<<"start record, first is "<<(mfcc->winLengthSamples-mfcc->frameShiftSamples) *2<<"second is:"<<mfcc->frameShiftSamples *2<<std::endl;
 
@@ -181,7 +219,7 @@ int AlsaRecord::do_record()
             //std::cout.flush();
             //std::cout<<"data is"<<wav_data[0]<<wav_data[MAX_BUF_SIZE * 4 -1]<<std::endl;
             mfcc->addPreData(wav_data);
-
+             fwrite(wav_data, 1, (mfcc->winLengthSamples-mfcc->frameShiftSamples)*4, fwav);
  int16_t new_wav_data[mfcc->frameShiftSamples *2];
  double distance;
     v_d result;
@@ -212,31 +250,31 @@ int AlsaRecord::do_record()
         }
    
        
-
+    fwrite(new_wav_data, 1, (mfcc->frameShiftSamples)*4, fwav);
     
-    if(ncount%100000==0){
-         ad->put_number(mfcc->processFrame(new_wav_data,mfcc->frameShiftSamples));
+
+         ad->put_number(mfcc->processFrame(new_wav_data,mfcc->frameShiftSamples, true));
     distance=ad->dtw();
-
-        std::cout<<"distance less than 1000,:"<<distance<<std::endl;
-
-    }
+        if(distance<2100){std::cout<<"distance less than 1600,:"<<distance<<std::endl;}
+        
    
 
   
 
                 ncount++;
     } while (b_quit); /*esc */
+    fclose(fwav);
     ad->get_data();
     std::ofstream ofile;
-    ofile.open("TEST.txt",std::ios::out);
+    ofile.open("test.txt",std::ios::out);
     for(int i=0;i<ad->dim*ad->data_length;i++){
         ofile<<ad->right_data[i]<<"\n";
 
     }
+
     ofile.close();
 
-
+std::cout<<"ncount is "<<ncount<<std::endl;
     return EXIT_SUCCESS;
 }
 

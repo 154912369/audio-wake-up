@@ -63,7 +63,7 @@ class AlsaRecord
         MFCC* mfcc;
         AudioData* ad;
 
-        unsigned int srate =  100000;
+        unsigned int srate = 16000;
         unsigned int nchan = 2;
          bool b_quit;
 

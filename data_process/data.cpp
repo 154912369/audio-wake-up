@@ -87,7 +87,7 @@ public:
 
     double dtw(){
 
-        int* sum_distance=new int[(this->data_length+1)*(this->compare_data_length+1)];
+        float* sum_distance=new float[(this->data_length+1)*(this->compare_data_length+1)];
         sum_distance[0]=0;
         for(int i=0;i<data_length;i++){
             sum_distance[i+1]=0;
