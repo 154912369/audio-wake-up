@@ -4,7 +4,6 @@
  * This document is under GPL v2 License. See : http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-
 #include <stdio.h>
 /* rien */
 /*#include <iostream>*/
@@ -45,12 +44,11 @@ char getch()
      * Source : https://en.wikibooks.org/wiki/Serial_Programming/termios
      */
 
-    if(tcgetattr(STDIN_FILENO, &old) < 0)
+    if (tcgetattr(STDIN_FILENO, &old) < 0)
     {
         perror("stdin");
         return EXIT_FAILURE;
     }
-
 
     tcgetattr(filedesc, &old);
     old.c_lflag &= ~ICANON;
@@ -58,15 +56,14 @@ char getch()
     old.c_cc[VMIN] = 1;
     old.c_cc[VTIME] = 0;
 
-
     tcsetattr(filedesc, TCSANOW, &old);
 
-    if(rv != -1)
+    if (rv != -1)
     {
-      int anErr = read(filedesc, &buff, len );
+        int anErr = read(filedesc, &buff, len);
 
-      if (anErr < 0)
-        fprintf(stdout, "read issue");
+        if (anErr < 0)
+            fprintf(stdout, "read issue");
     }
 
     old.c_lflag |= ICANON;

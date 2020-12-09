@@ -10,28 +10,26 @@
 #ifndef __ALSA_RECORD_HPP__
 #define __ALSA_RECORD_HPP__
 
-
-#define OPEN_ERROR        1
-#define MALLOC_ERROR      2
-#define ANY_ERROR         3
-#define ACCESS_ERROR      4
-#define FORMAT_ERROR      5
-#define RATE_ERROR        6
-#define CHANNELS_ERROR    7
-#define PARAMS_ERROR      8
-#define PREPARE_ERROR     9
-#define FOPEN_ERROR       10
-#define FCLOSE_ERROR      11
-#define SNDREAD_ERROR     12
-#define START_ERROR       13
-
+#define OPEN_ERROR 1
+#define MALLOC_ERROR 2
+#define ANY_ERROR 3
+#define ACCESS_ERROR 4
+#define FORMAT_ERROR 5
+#define RATE_ERROR 6
+#define CHANNELS_ERROR 7
+#define PARAMS_ERROR 8
+#define PREPARE_ERROR 9
+#define FOPEN_ERROR 10
+#define FCLOSE_ERROR 11
+#define SNDREAD_ERROR 12
+#define START_ERROR 13
 
 struct wav_header // Wav file header structure
 {
-    uint8_t ChunkID[4];//riff
-    uint32_t ChunkSize;//Subchunk2Size + 36;
-    uint8_t Format[4];//wave
-    uint8_t Subchunk1ID[4];//fmt
+    uint8_t ChunkID[4];     //riff
+    uint32_t ChunkSize;     //Subchunk2Size + 36;
+    uint8_t Format[4];      //wave
+    uint8_t Subchunk1ID[4]; //fmt
     uint32_t Subchunk1Size;
     uint16_t AudioFormat;
     uint16_t NumChannels;
@@ -39,56 +37,53 @@ struct wav_header // Wav file header structure
     uint32_t ByteRate;
     uint16_t BlockAlign;
     uint16_t BitsPerSample;
-    uint8_t Subchunk2ID[4];//data
-    uint32_t Subchunk2Size;//  MAX_BUF_SIZE * ncount * (uint32_t) wav_h.NumChannels * (uint32_t) wav_h.BitsPerSample / 8;
+    uint8_t Subchunk2ID[4]; //data
+    uint32_t Subchunk2Size; //  MAX_BUF_SIZE * ncount * (uint32_t) wav_h.NumChannels * (uint32_t) wav_h.BitsPerSample / 8;
 };
-
 
 class AlsaRecord
 {
-    public:
-        // Ctor()
-        AlsaRecord();
+public:
+    // Ctor()
+    AlsaRecord();
 
-        // Dtor()
-        ~AlsaRecord();
+    // Dtor()
+    ~AlsaRecord();
 
-        void init(void);
+    void init(void);
 
-        struct wav_header wav_h;
+    struct wav_header wav_h;
 
-        snd_pcm_t* capture_handle;
-        snd_pcm_hw_params_t* hw_params;
-        snd_pcm_info_t* s_info;
-        MFCC* mfcc;
-        AudioData* ad;
+    snd_pcm_t *capture_handle;
+    snd_pcm_hw_params_t *hw_params;
+    snd_pcm_info_t *s_info;
+    MFCC *mfcc;
+    AudioData *ad;
 
-        unsigned int srate = 16000;
-        unsigned int nchan = 2;
-         bool b_quit;
+    unsigned int srate = 16000;
+    unsigned int nchan = 2;
+    bool b_quit;
 
-        char * wav_name;
-        char * fname;
-        FILE * fwav;
+    char *wav_name;
+    char *fname;
+    FILE *fwav;
 
-        int init_soundcard(void);
-        int close_soundcard(void);
-        int init_wav_header(void);
-        int init_wav_file( char *);
-        int close_wav_file(void);
+    int init_soundcard(void);
+    int close_soundcard(void);
+    int init_wav_header(void);
+    int init_wav_file(char *);
+    int close_wav_file(void);
 
-        void set_sound_device(const char * aDeviceName) { snd_device = aDeviceName; };
-        int do_record();
+    void set_sound_device(const char *aDeviceName) { snd_device = aDeviceName; };
+    int do_record();
 
-        inline const char * getSoundDevice(void) { return snd_device; }
+    inline const char *getSoundDevice(void) { return snd_device; }
 
-    private:
-        const char * snd_device;
+private:
+    const char *snd_device;
 };
-
 
 #endif /* __ALSA_RECORD_HPP__ */
 
-
 static bool b_quit = false;
-void keyboard_loop(AlsaRecord*);
+void keyboard_loop(AlsaRecord *);
