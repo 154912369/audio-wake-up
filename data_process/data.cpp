@@ -87,35 +87,45 @@ public:
 
     double dtw(){
 
-        float* sum_distance=new float[(this->data_length+1)*(this->compare_data_length+1)];
-        sum_distance[0]=0;
-        for(int i=0;i<data_length;i++){
-            sum_distance[i+1]=0;
-        }
+        float* sum_distance=new float[(this->data_length)*(this->compare_data_length)];
+        sum_distance[0]=distance_data[0];
         int correct_pointer=circle_point;
-        for(int i=0;i<this->compare_data_length;i++){
-            sum_distance[(i+1)*(this->compare_data_length+1)]=0;
+        for(int i=1;i<this->data_length;i++){
+            correct_pointer=circle_point+i;
+             if(correct_pointer>=data_length){
+                correct_pointer-=data_length;
+            }
+            sum_distance[i*(this->compare_data_length)]=sum_distance[(i-1)*(this->compare_data_length)]+distance_data[correct_pointer*(this->compare_data_length)];
         }
+        correct_pointer=circle_point;
+        for(int i=1;i<this->compare_data_length;i++){
+             if(correct_pointer>=data_length){
+                correct_pointer-=data_length;
+            }
+            sum_distance[i]=sum_distance[(i-1)]+distance_data[correct_pointer*(this->compare_data_length)+i];
+        }
+        
         double min_score=0;
         correct_pointer=circle_point;
-        for(int i=1;i<data_length+1;i++){
+        for(int i=1;i<data_length;i++){
+            correct_pointer=circle_point+i;
             if(correct_pointer>=data_length){
                 correct_pointer-=data_length;
             }
-            for(int j=1;j<compare_data_length+1;j++){
-                min_score=sum_distance[(i-1)*(this->compare_data_length+1)+j];
-                if(min_score>sum_distance[(i-1)*(this->compare_data_length+1)+j-1]){
-                    min_score=sum_distance[(i-1)*(this->compare_data_length+1)+j-1];
+            for(int j=1;j<compare_data_length;j++){
+                min_score=sum_distance[(i-1)*(this->compare_data_length)+j];
+                if(min_score>sum_distance[(i-1)*(this->compare_data_length)+j-1]){
+                    min_score=sum_distance[(i-1)*(this->compare_data_length)+j-1];
                 }
-                if(min_score>sum_distance[i*(this->compare_data_length+1)+j-1]){
-                    min_score=sum_distance[i*(this->compare_data_length+1)+j-1];
+                if(min_score>sum_distance[i*(this->compare_data_length)+j-1]){
+                    min_score=sum_distance[i*(this->compare_data_length)+j-1];
                 }
-                sum_distance[i*(compare_data_length+1)+j]=min_score+distance_data[correct_pointer*(this->compare_data_length)+j-1];
+                sum_distance[i*(compare_data_length)+j]=min_score+distance_data[correct_pointer*(this->compare_data_length)+j];
                 
             }
-            correct_pointer+=1;
+            
         }
-    return sum_distance[data_length*(compare_data_length+1)+compare_data_length];
+    return sum_distance[(data_length-1)*(compare_data_length)+compare_data_length-1];
 
     }
     

@@ -58,7 +58,7 @@ void AlsaRecord::init()
     this->mfcc= new MFCC(samplingRate, numCepstra, winLength, frameShift, numFilters, lowFreq, highFreq);
     int dtw_length=120;
     double* compare_daa=new double[dtw_length*(numCepstra+1)];
-    std::ifstream in("test.txt");  
+    std::ifstream in("best.txt");  
     std::string s;
     int i=0;
     while (getline(in, s)) {//读取每一行
@@ -255,7 +255,7 @@ int AlsaRecord::do_record()
 
          ad->put_number(mfcc->processFrame(new_wav_data,mfcc->frameShiftSamples, true));
     distance=ad->dtw();
-        if(distance<2100){std::cout<<"distance less than 1600,:"<<distance<<std::endl;}
+        if(distance<3400){std::cout<<"distance less than 1600,:"<<distance<<std::endl;}
         
    
 
@@ -269,6 +269,13 @@ int AlsaRecord::do_record()
     ofile.open("test.txt",std::ios::out);
     for(int i=0;i<ad->dim*ad->data_length;i++){
         ofile<<ad->right_data[i]<<"\n";
+
+    }
+
+    ofile.close();
+    ofile.open("test2.txt",std::ios::out);
+    for(int i=0;i<ad->dim*ad->data_length;i++){
+        ofile<<ad->compare_data[i]<<"\n";
 
     }
 

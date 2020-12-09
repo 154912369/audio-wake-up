@@ -10,7 +10,7 @@ MESSAGE( STATUS "this var key = ${DIR_SRCS}.")
 
 set(SOURCES_FILES main.cpp)
 
-add_executable(trans  trans2mfcc.cpp ${DIR_SRCS} ${DATA_SRCS} ${MFCC_SRCS})
-target_link_libraries(trans -lasound -lpthread )
-# add_executable(audio_test  ${DIR_SRCS} ${DATA_SRCS} ${MFCC_SRCS} ${SOURCES_FILES})
-# target_link_libraries(audio_test -lasound -lpthread )
+# add_executable(trans  trans2mfcc.cpp ${DIR_SRCS} ${DATA_SRCS} ${MFCC_SRCS})
+# target_link_libraries(trans -lasound -lpthread )
+add_executable(audio_test  ${DIR_SRCS} ${DATA_SRCS} ${MFCC_SRCS} ${SOURCES_FILES})
+target_link_libraries(audio_test -lasound -lpthread )

@@ -62,7 +62,7 @@ int main(){
     wav_h.BlockAlign = (uint32_t) wav_h.NumChannels * (uint32_t) wav_h.BitsPerSample / 8;
     fwrite(&wav_h, 1, sizeof(wav_h), fwav);
     MFCC mfcc(samplingRate, numCepstra, winLength, frameShift, numFilters, lowFreq, highFreq);
-    std::ifstream file("/home/renweijie/code/cpp/Linux_Alsa_Audio_Record/build/test1.wav", std::ios::binary);
+    std::ifstream file("/home/renweijie/code/cpp/Linux_Alsa_Audio_Record/build/test4.wav", std::ios::binary);
     int16_t wav_data[(mfcc.winLengthSamples-mfcc.frameShiftSamples) *2];
     file.read((char *)wav_data, 44);
     file.read((char *)wav_data, (mfcc.winLengthSamples-mfcc.frameShiftSamples) *4);
