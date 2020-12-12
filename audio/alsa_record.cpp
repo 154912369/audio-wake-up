@@ -66,7 +66,7 @@ void AlsaRecord::init()
 
     this->ad = new AudioData(dtw_length, numCepstra + 1, compare_daa, dtw_length);
 }
-
+int lastcall=0;
 /// Open and init default sound card params
 int AlsaRecord::init_soundcard()
 {
@@ -166,39 +166,6 @@ int AlsaRecord::do_record()
 {
     this->b_quit = true;
     int err = 0;
-    fwav = fopen("test.wav", "wb");
-    wav_h.ChunkID[0] = 'R';
-    wav_h.ChunkID[1] = 'I';
-    wav_h.ChunkID[2] = 'F';
-    wav_h.ChunkID[3] = 'F';
-
-    wav_h.Format[0] = 'W';
-    wav_h.Format[1] = 'A';
-    wav_h.Format[2] = 'V';
-    wav_h.Format[3] = 'E';
-
-    wav_h.Subchunk1ID[0] = 'f';
-    wav_h.Subchunk1ID[1] = 'm';
-    wav_h.Subchunk1ID[2] = 't';
-    wav_h.Subchunk1ID[3] = ' ';
-
-    wav_h.Subchunk2ID[0] = 'd';
-    wav_h.Subchunk2ID[1] = 'a';
-    wav_h.Subchunk2ID[2] = 't';
-    wav_h.Subchunk2ID[3] = 'a';
-
-    wav_h.NumChannels = 2;
-    wav_h.BitsPerSample = 16;
-    wav_h.Subchunk2Size = 300 * MAX_SAMPLES * (uint32_t)wav_h.NumChannels * (uint32_t)wav_h.BitsPerSample / 8;
-    //wav_h.Subchunk2Size = 0xFFFFFFFF;
-    wav_h.ChunkSize = (uint32_t)wav_h.Subchunk2Size + 36;
-    wav_h.Subchunk1Size = 16;
-    wav_h.AudioFormat = 1;
-    wav_h.SampleRate = srate;
-    wav_h.ByteRate = (uint32_t)wav_h.SampleRate * (uint32_t)wav_h.NumChannels * (uint32_t)wav_h.BitsPerSample / 8;
-    wav_h.BlockAlign = (uint32_t)wav_h.NumChannels * (uint32_t)wav_h.BitsPerSample / 8;
-
-    fwrite(&wav_h, 1, sizeof(wav_h), fwav);
     int16_t wav_data[(mfcc->winLengthSamples - mfcc->frameShiftSamples) * 2];
     std::cout << "start record, first is " << (mfcc->winLengthSamples - mfcc->frameShiftSamples) * 2 << "second is:" << mfcc->frameShiftSamples * 2 << std::endl;
 
@@ -223,13 +190,13 @@ int AlsaRecord::do_record()
     }
 
     mfcc->addPreData(wav_data);
-    fwrite(wav_data, 1, (mfcc->winLengthSamples - mfcc->frameShiftSamples) * 4, fwav);
     int16_t new_wav_data[mfcc->frameShiftSamples * 2];
     double distance;
     v_d result;
     unsigned long int ncount = 0;
     clock_t start, ends;
     start = clock();
+    std::thread* thread1;
     do
     {
         if ((err = snd_pcm_readi(capture_handle, new_wav_data, mfcc->frameShiftSamples)) != mfcc->frameShiftSamples)
@@ -259,9 +226,21 @@ int AlsaRecord::do_record()
 
         ad->put_number(mfcc->processFrame(new_wav_data, mfcc->frameShiftSamples, true));
         distance = ad->dtw();
-        if (distance < 3400)
+        
+        if (distance < 3400 && ncount>lastcall+150)
         {
-            std::cout << "distance less than 1600,:" << distance << std::endl;
+            lastcall=ncount;
+            if(tk.getgoging()){
+                tk.setonging(false);
+                delete thread1;
+            }else{
+            
+            tk.settask(0);
+             thread1=new std::thread(&task::run, &tk);
+            thread1->detach();
+            }
+
+           
         }
 
         ncount++;

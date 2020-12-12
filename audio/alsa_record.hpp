@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <alsa/asoundlib.h>
 #include "mfcc/mfcc.cpp"
+#include "tasks/task.cpp"
 #ifndef __ALSA_RECORD_HPP__
 #define __ALSA_RECORD_HPP__
 
@@ -59,14 +60,12 @@ public:
     snd_pcm_info_t *s_info;
     MFCC *mfcc;
     AudioData *ad;
-
+    task tk=task();
     unsigned int srate = 16000;
     unsigned int nchan = 2;
     bool b_quit;
 
     char *wav_name;
-    char *fname;
-    FILE *fwav;
 
     int init_soundcard(void);
     int close_soundcard(void);
